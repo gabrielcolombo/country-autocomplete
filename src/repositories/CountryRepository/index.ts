@@ -2,7 +2,7 @@ import { Http } from "../../services";
 
 const BASE_URL = 'https://restcountries.com/v3.1/name/';
 
-type Country = {
+export type Country = {
   name: any,
   flag: any,
   capital: string[],
@@ -10,7 +10,7 @@ type Country = {
 }
 
 export default class CountryRepository {
-  static fetchCountryByName(name: string): Promise<Country[]> {
+  static fetchCountryByName(name: string) {
     return Http.get(`${BASE_URL}/${name}?fields=name,flag`);
   }
 }

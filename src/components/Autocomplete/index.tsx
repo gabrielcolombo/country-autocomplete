@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useDebouncedValue } from '../../hooks';
 import { CountryRepository } from '../../repositories';
+import { Country } from '../../repositories/CountryRepository';
 import './Autocomplete.css';
 import { SuggestionType } from './Autocomplete.types';
 interface AutocompleteProps {
@@ -24,6 +25,7 @@ const Autocomplete = ({ ...props }) => {
     onSelect,
   }: AutocompleteProps = props;
 
+  let ongoingRequest = useRef<any>(null);
   const inputRef = useRef<any>(null);
 
   const [isFocused, setIsFocused] = useState(false);
@@ -68,10 +70,20 @@ const Autocomplete = ({ ...props }) => {
 
   const getSearchResults = useCallback(async (query: string): Promise<void> => {
     try {
+      if (ongoingRequest.current) {
+        ongoingRequest.current.abort();
+      }
+
       setIsSearching(true);
     
-      const response = await CountryRepository.fetchCountryByName(query);
-      const countries = response.map((country) => ({ label: country.name.common, value: country }));
+      const request = CountryRepository.fetchCountryByName(query);
+
+      console.log(request)
+
+      ongoingRequest.current = request;
+
+      const response = await request.response;
+      const countries = response.map((country: Country) => ({ label: country.name.common, value: country }))
 
       setSuggestions(countries);
     } catch(err) {
