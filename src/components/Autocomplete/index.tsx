@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useDebouncedValue } from '../../hooks';
+import { CountryRepository } from '../../repositories';
 import './Autocomplete.css';
 import { SuggestionType } from './Autocomplete.types';
 interface AutocompleteProps {
@@ -65,17 +66,19 @@ const Autocomplete = ({ ...props }) => {
     }
   }
 
-  const getSearchResults = useCallback((query: string): void => {
-    setIsSearching(true);
+  const getSearchResults = useCallback(async (query: string): Promise<void> => {
+    try {
+      setIsSearching(true);
     
-    setTimeout(() => {
-      setSuggestions([
-        { label: 'Option #1', value: "1" }, 
-        { label: 'Option #2', value: "2" }, 
-        { label: 'Option #3', value: "3" }, 
-      ]);
+      const response = await CountryRepository.fetchCountryByName(query);
+      const countries = response.map((country) => ({ label: country.name.common, value: country }));
+
+      setSuggestions(countries);
+    } catch(err) {
+      setSuggestions([]);
+    } finally {
       setIsSearching(false);
-    }, 1000)
+    }
   }, [debouncedSearchValue]);
 
   useEffect((): void => {
@@ -119,7 +122,7 @@ const Autocomplete = ({ ...props }) => {
       )}
 
       {isFocused && !isSearching && suggestions.length > 0 && (
-        <ul
+        <dl
           id={`${id}__listbox`}
           role="listbox"
           {...(label) ? { "aria-label": label } : {}}
@@ -139,10 +142,11 @@ const Autocomplete = ({ ...props }) => {
               onMouseEnter={() => setHighlightedOption(index)}
               onClick={() => handleSuggestionSelect(suggestion)}
             >
-              Option #{index}
+              <b>{suggestion.value.flag} {suggestion.label}</b>
+              <small>{suggestion.value.altSpellings.join(", ")}</small>
             </li>)
           )}
-        </ul>
+        </dl>
       )}
     </div>
   )

@@ -1,7 +1,17 @@
 .suggestions__item {
   outline: none;
+  padding: 10px;
+}
+
+.suggestions__item b {
+  display: block;
+}
+
+.suggestions__item small {
+  color: #999;
+  padding: 5px 0;
 }
 
 .suggestions__item--highlighted {
-  font-weight: 700;
+  background: #ddd;
 }
