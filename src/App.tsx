@@ -5,16 +5,42 @@ import './App.css';
 import { SuggestionType } from './components/Autocomplete/Autocomplete.types';
 
 function App() {
-  const [selectedValue, setSelectedValue] = useState<SuggestionType | null>(null);
+  const [country, setCountry] = useState<SuggestionType | null>(null);
 
   return (
     <div className="App">
-      <Autocomplete
-        onSelect={setSelectedValue}
-        onClear={() => setSelectedValue(null)}
-      />
+      <div className="container">
+        <header>
+          The Country Encyclopedia
+        </header>
 
-      {selectedValue && (<div>Selected option: {selectedValue?.label}</div>)}
+        <main>
+          <h1>Pick a country below to know more about it</h1>
+
+          <Autocomplete
+            onSelect={setCountry}
+            onClear={() => setCountry(null)}
+          />
+
+          {country && (
+            <section>
+              <h2>
+                {country.value.name.common} {country.value.flag}
+              </h2>
+
+              <p>
+                Also known as {country.value.altSpellings.join(' / ')}, its a country
+                located in {country.value.subregion}.
+              </p>
+
+              <p>
+                It has a population of {country.value.population.toLocaleString()} people and {Object.values(country.value.languages).length} official language(s) ({Object.values(country.value.languages).join(' / ')}).
+              </p>
+            </section>
+          )}
+        </main>
+      </div>
+
     </div>
   );
 }

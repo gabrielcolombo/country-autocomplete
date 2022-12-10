@@ -11,6 +11,6 @@ export type Country = {
 
 export default class CountryRepository {
   static fetchCountryByName(name: string) {
-    return Http.get(`${BASE_URL}/${name}?fields=name,flag`);
+    return Http.get(`${BASE_URL}/${name}`);
   }
 }

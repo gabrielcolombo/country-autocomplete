@@ -1,3 +1,27 @@
+
+.autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete__label,
+.autocomplete__input,
+.suggestions {
+  display: block;
+  width: 100%;
+}
+
+.autocomplete__input {
+  padding: 15px;
+}
+
+.suggestions {
+  top: 100%;
+  max-height: 50vh;
+  overflow: auto;
+  position: absolute;
+}
+
 .suggestions__item {
   outline: none;
   padding: 10px;

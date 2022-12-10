@@ -25,7 +25,7 @@ const Autocomplete = ({ ...props }) => {
     id = "Autocomplete",
     placeholder = "Type at least 2 letters to search",
     initialValue = { label: "", value: null },
-    label = "Country",
+    label,
     onSelect,
     onClear
   }: AutocompleteProps = props;
@@ -121,9 +121,13 @@ const Autocomplete = ({ ...props }) => {
     <div
       id={id}
       onKeyDown={({ code }) => handleKeyboardNavigation(code)}
+      className="autocomplete"
     >
       {label && (
-        <label htmlFor={`${id}__input`}>
+        <label
+          htmlFor={`${id}__input`}
+          className="autocomplete__label"
+        >
           {label}
         </label>
       )}
@@ -131,6 +135,7 @@ const Autocomplete = ({ ...props }) => {
       <input
         ref={inputRef}
         id={`${id}__input`}
+        className="autocomplete__input"
         autoComplete="off"
         role="combobox"
         aria-expanded="false"
@@ -153,10 +158,11 @@ const Autocomplete = ({ ...props }) => {
       )}
 
       {isFocused && !isSearching && suggestions.length > 0 && (
-        <dl
+        <ul
           id={`${id}__listbox`}
           role="listbox"
           {...(label) ? { "aria-label": label } : {}}
+          className="suggestions"
         >
           {suggestions.map((suggestion, index) => (
             <li
@@ -177,7 +183,7 @@ const Autocomplete = ({ ...props }) => {
               <small>{suggestion.value.altSpellings.join(", ")}</small>
             </li>)
           )}
-        </dl>
+        </ul>
       )}
     </div>
   )
