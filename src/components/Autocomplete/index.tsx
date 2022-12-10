@@ -164,25 +164,37 @@ const Autocomplete = ({ ...props }) => {
           {...(label) ? { "aria-label": label } : {}}
           className="suggestions"
         >
-          {suggestions.map((suggestion, index) => (
-            <li
-              className={[
-                "suggestions__item",
-                highlightedOption === index ? "suggestions__item--highlighted" : ""
-              ].join(" ")}
-              role="option"
-              aria-posinset={index + 1}
-              aria-setsize={suggestions.length}
-              aria-selected="true"
-              tabIndex={-1}
-              key={`${JSON.stringify(suggestion)}__${index}`}
-              onMouseEnter={() => setHighlightedOption(index)}
-              onClick={() => handleSuggestionSelect(suggestion)}
-            >
-              <b>{suggestion.value.flag} {suggestion.label}</b>
-              <small>{suggestion.value.altSpellings.join(", ")}</small>
-            </li>)
-          )}
+          {suggestions.map((suggestion, index) => {
+            const match = suggestion.value.name.common.match(new RegExp(searchValue, "gi"))
+
+            return (
+              <li
+                className={[
+                  "suggestions__item",
+                  highlightedOption === index ? "suggestions__item--highlighted" : ""
+                ].join(" ")}
+                role="option"
+                aria-posinset={index + 1}
+                aria-setsize={suggestions.length}
+                aria-selected="true"
+                tabIndex={-1}
+                key={`${JSON.stringify(suggestion)}__${index}`}
+                onMouseEnter={() => setHighlightedOption(index)}
+                onClick={() => handleSuggestionSelect(suggestion)}
+              >
+                <b>
+                  {suggestion.value.flag}
+
+                  {suggestion.value.name.common
+                    .replace(match, '_')
+                    .split('')
+                    .map((char: string) => char === "_" ? <mark>{match}</mark> : char)
+                  }
+                </b>
+                <small>{suggestion.value.altSpellings.join(", ")}</small>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
