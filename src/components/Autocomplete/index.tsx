@@ -110,7 +110,9 @@ const Autocomplete = ({ ...props }) => {
   }, []);
 
   useEffect((): void => {
-    if (isFocused && searchValue.length > 1) {
+    if (searchValue.length === 0) {
+      setSuggestions([])
+    } else if (isFocused && searchValue.length > 1) {
       getSearchResults(debouncedSearchValue)
     }
   }, [isFocused, debouncedSearchValue, searchValue.length, getSearchResults])
