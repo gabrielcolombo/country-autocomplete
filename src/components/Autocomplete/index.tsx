@@ -8,6 +8,8 @@ interface AutocompleteProps {
   initialValue?: string;
 }
 
+type Suggestion = {}
+
 const KEYCODES = {
   ENTER: "Enter",
   ARROW_UP: "ArrowUp",
@@ -28,14 +30,13 @@ const Autocomplete = ({ ...props }) => {
 
   const [searchValue, setSearchValue] = useState(initialValue);
   const debouncedSearchValue = useDebouncedValue(searchValue);
-  const [suggestions, setSuggestions] = useState([{}, {}, {}, {}, {}, {}]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [highlightedOption, setHighlightedOption] = useState<number | null>(null);
 
   const handleKeyboardNavigation = (keyCode: string) => {
     const lastSuggestionIndex = suggestions.length - 1;
     const isLastItemSelected = highlightedOption === lastSuggestionIndex;
 
-    console.log(keyCode)
     switch(keyCode) {
       case KEYCODES.ARROW_UP:
         setHighlightedOption(!highlightedOption ? lastSuggestionIndex : highlightedOption - 1);
@@ -50,8 +51,11 @@ const Autocomplete = ({ ...props }) => {
 
   const getSearchResults = useCallback((query: string) => {
     setIsSearching(true);
-
-    setTimeout(() => setIsSearching(false), 2000)
+    
+    setTimeout(() => {
+      setSuggestions([{}, {}, {}, {}, {}, {}]);
+      setIsSearching(false);
+    }, 2000)
   }, [debouncedSearchValue]);
 
   useEffect(() => {
@@ -82,39 +86,44 @@ const Autocomplete = ({ ...props }) => {
         value={searchValue}
         onFocus={() => setIsFocused(true)}
         onChange={({ target }) => setSearchValue(target.value)}
-        onBlur={() => {
-          setIsFocused(false)
+        onBlur={({ relatedTarget }) => {
+          if (!relatedTarget || relatedTarget.tagName !== "LI") {
+            setIsFocused(false);
+            setSuggestions([]);
+          }
         }}
       />
 
-      <ul
-        id={`${id}__listbox`}
-        role="listbox"
-        {...(label) ? { "aria-label": label } : {}}
-      >
-        {isSearching
-          ? <li>
-              Searching...
-            </li>
-          : suggestions.map((suggestion, index) => (
-            <li
-              className={[
-                "suggestions__item",
-                highlightedOption === index ? "suggestions__item--highlighted" : ""
-              ].join(" ")}
-              role="option"
-              aria-posinset={index + 1}
-              aria-setsize={suggestions.length}
-              aria-selected="true"
-              tabIndex={-1}
-              key={`${JSON.stringify(suggestion)}__${index}`}
-              onMouseEnter={() => setHighlightedOption(index)}
-            >
-              Option #{index}
-            </li>
-          ))
-        }
-      </ul>
+      {isFocused && suggestions.length > 0 && (
+        <ul
+          id={`${id}__listbox`}
+          role="listbox"
+          {...(label) ? { "aria-label": label } : {}}
+        >
+          {isSearching
+            ? <li>
+                Searching...
+              </li>
+            : suggestions.map((suggestion, index) => (
+              <li
+                className={[
+                  "suggestions__item",
+                  highlightedOption === index ? "suggestions__item--highlighted" : ""
+                ].join(" ")}
+                role="option"
+                aria-posinset={index + 1}
+                aria-setsize={suggestions.length}
+                aria-selected="true"
+                tabIndex={-1}
+                key={`${JSON.stringify(suggestion)}__${index}`}
+                onMouseEnter={() => setHighlightedOption(index)}
+              >
+                Option #{index}
+              </li>
+            ))
+          }
+        </ul>
+      )}
     </div>
   )
 }
