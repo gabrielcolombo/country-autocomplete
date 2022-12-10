@@ -18,18 +18,23 @@ const Autocomplete = ({ ...props }) => {
   const inputRef = useRef(null);
 
   const [isFocused, setIsFocused] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const [searchValue, setSearchValue] = useState(initialValue);
   const debouncedSearchValue = useDebouncedValue(searchValue);
   const [options, setOptions] = useState([]);
 
   const getSearchResults = useCallback((query: string) => {
-    console.log(query);
+    setIsSearching(true);
+
+    setTimeout(() => setIsSearching(false), 2000)
   }, [debouncedSearchValue]);
 
   useEffect(() => {
-    getSearchResults(debouncedSearchValue)
-  }, [debouncedSearchValue, getSearchResults])
+    if (isFocused && searchValue.length > 0) {
+      getSearchResults(debouncedSearchValue)
+    }
+  }, [isFocused, debouncedSearchValue, getSearchResults])
 
   return (
     <div id={id}>
@@ -62,19 +67,24 @@ const Autocomplete = ({ ...props }) => {
         role="listbox"
         {...(label) ? { "aria-label": label } : {}}
       >
-        {options.map((option, index) => (
-          <li
-            role="option"
-            aria-posinset={index + 1}
-            aria-setsize={options.length}
-            aria-selected="true"
-            tabIndex={-1}
-            key={`${JSON.stringify(option)}__${index}`}
-          >
-            Option #{index}
-          </li>
-        ))}
-        
+        {isSearching
+          ? <li>
+              Searching...
+            </li>
+          : options.map((option, index) => (
+            <li
+              className="suggestions__item"
+              role="option"
+              aria-posinset={index + 1}
+              aria-setsize={options.length}
+              aria-selected="true"
+              tabIndex={-1}
+              key={`${JSON.stringify(option)}__${index}`}
+            >
+              Option #{index}
+            </li>
+          ))
+        }
       </ul>
     </div>
   )
