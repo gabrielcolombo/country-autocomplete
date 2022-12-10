@@ -8,13 +8,15 @@ interface AutocompleteProps {
   id?: string;
   label?: string;
   initialValue?: SuggestionType;
-  onSelect?: Function
+  onSelect?: Function;
+  onClear?: Function
 }
 
 const KEYCODES = {
   ENTER: "Enter",
   ARROW_UP: "ArrowUp",
-  ARROW_DOWN: "ArrowDown"
+  ARROW_DOWN: "ArrowDown",
+  ESCAPE: "Escape"
 }
 
 const Autocomplete = ({ ...props }) => {
@@ -23,6 +25,7 @@ const Autocomplete = ({ ...props }) => {
     initialValue = { label: "", value: null },
     label,
     onSelect,
+    onClear
   }: AutocompleteProps = props;
 
   let ongoingRequest = useRef<any>(null);
@@ -47,15 +50,28 @@ const Autocomplete = ({ ...props }) => {
     onSelect?.(suggestion);
   }
 
+  const handleSelectionClear = () => {
+    setSearchValue("");
+    setSuggestions([]);
+    setHighlightedOption(null);
+
+    if (onClear) {
+      onClear()
+    }
+  }
+
   const handleKeyboardNavigation = (keyCode: string): void => {
     const lastSuggestionIndex = suggestions.length - 1;
     const isLastItemSelected = highlightedOption === lastSuggestionIndex;
-
+    
     switch(keyCode) {
       case KEYCODES.ENTER:
         if (highlightedOption) {
           handleSuggestionSelect(suggestions[highlightedOption]);
         }
+        break;
+      case KEYCODES.ESCAPE:
+        handleSelectionClear()
         break;
       case KEYCODES.ARROW_UP:
         setHighlightedOption(!highlightedOption ? lastSuggestionIndex : highlightedOption - 1);
@@ -78,8 +94,6 @@ const Autocomplete = ({ ...props }) => {
     
       const request = CountryRepository.fetchCountryByName(query);
 
-      console.log(request)
-
       ongoingRequest.current = request;
 
       const response = await request.response;
@@ -91,13 +105,13 @@ const Autocomplete = ({ ...props }) => {
     } finally {
       setIsSearching(false);
     }
-  }, [debouncedSearchValue]);
+  }, []);
 
   useEffect((): void => {
-    if (isFocused && searchValue.length > 0) {
+    if (isFocused && searchValue.length > 1) {
       getSearchResults(debouncedSearchValue)
     }
-  }, [isFocused, debouncedSearchValue, getSearchResults])
+  }, [isFocused, debouncedSearchValue, searchValue.length, getSearchResults])
 
   return (
     <div

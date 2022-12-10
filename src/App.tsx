@@ -11,6 +11,7 @@ function App() {
     <div className="App">
       <Autocomplete
         onSelect={setSelectedValue}
+        onClear={() => setSelectedValue(null)}
       />
 
       {selectedValue && (<div>Selected option: {selectedValue?.label}</div>)}
