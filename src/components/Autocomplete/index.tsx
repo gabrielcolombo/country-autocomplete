@@ -7,6 +7,7 @@ import { SuggestionType } from './Autocomplete.types';
 interface AutocompleteProps {
   id?: string;
   label?: string;
+  placeholder?: string;
   initialValue?: SuggestionType;
   onSelect?: Function;
   onClear?: Function
@@ -22,8 +23,9 @@ const KEYCODES = {
 const Autocomplete = ({ ...props }) => {
   const {
     id = "Autocomplete",
+    placeholder = "Type at least 2 letters to search",
     initialValue = { label: "", value: null },
-    label,
+    label = "Country",
     onSelect,
     onClear
   }: AutocompleteProps = props;
@@ -133,6 +135,7 @@ const Autocomplete = ({ ...props }) => {
         aria-autocomplete="list"
         aria-controls={`${id}__listbox`}
         value={searchValue}
+        placeholder={placeholder}
         onFocus={() => setIsFocused(true)}
         onChange={({ target }) => setSearchValue(target.value)}
         onBlur={({ relatedTarget }) => {
