@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useDebouncedValue } from '../../hooks';
 import './Autocomplete.css';
 
@@ -14,6 +14,10 @@ const Autocomplete = ({ ...props }) => {
     label,
     initialValue = ""
   }: AutocompleteProps = props;
+
+  const inputRef = useRef(null);
+
+  const [isFocused, setIsFocused] = useState(false);
 
   const [searchValue, setSearchValue] = useState(initialValue);
   const debouncedSearchValue = useDebouncedValue(searchValue);
@@ -36,6 +40,7 @@ const Autocomplete = ({ ...props }) => {
       )}
 
       <input
+        ref={inputRef}
         id={`${id}__input`}
         autoComplete="off"
         role="combobox"
@@ -43,10 +48,14 @@ const Autocomplete = ({ ...props }) => {
         aria-autocomplete="list"
         aria-controls={`${id}__listbox`}
         value={searchValue}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => {
+          setIsFocused(false)
+        }}
         onChange={({ target }) => setSearchValue(target.value)}
       />
 
-      {searchValue}
+      {isFocused.toString()}
 
       <ul
         id={`${id}__listbox`}
