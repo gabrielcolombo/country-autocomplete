@@ -2,8 +2,6 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 60px;
-  height: 75vh;
   width: 100%;
 }
 

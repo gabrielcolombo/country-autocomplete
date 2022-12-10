@@ -9,38 +9,47 @@ function App() {
 
   return (
     <div className="App">
-      <div className="container">
-        <header>
+      <header>
+        <div className="container">
           The Country Encyclopedia
-        </header>
+        </div>
+      </header>
 
-        <main>
-          <h1>Pick a country below to know more about it</h1>
+      <main>
+        <div className="container">
+          {!country
+            ? (
+                <>
+                  <h1>Pick a country below to know more about it</h1>
+                  <Autocomplete
+                    onSelect={setCountry}
+                    onClear={() => setCountry(null)}
+                  />
+                </>
+              )
+            : (
+                <section>
+                  <h2>
+                    {country.value.name.common} {country.value.flag}
+                  </h2>
 
-          <Autocomplete
-            onSelect={setCountry}
-            onClear={() => setCountry(null)}
-          />
+                  <p>
+                    Also known as {country.value.altSpellings.join(' / ')}, its a country
+                    located in {country.value.subregion}.
+                  </p>
 
-          {country && (
-            <section>
-              <h2>
-                {country.value.name.common} {country.value.flag}
-              </h2>
-
-              <p>
-                Also known as {country.value.altSpellings.join(' / ')}, its a country
-                located in {country.value.subregion}.
-              </p>
-
-              <p>
-                It has a population of {country.value.population.toLocaleString()} people and {Object.values(country.value.languages).length} official language(s) ({Object.values(country.value.languages).join(' / ')}).
-              </p>
-            </section>
-          )}
-        </main>
-      </div>
-
+                  <p>
+                    It has a population of {country.value.population.toLocaleString()} peopleand
+                    {Object.values(country.value.languages).length} official language(s)
+                    ({Object.values(country.value.languages).join(' / ')}).
+                  </p>
+                  
+                  <button onClick={() => setCountry(null)}>Pick another country</button>
+                </section>
+              )
+          }
+        </div>
+      </main>
     </div>
   );
 }
