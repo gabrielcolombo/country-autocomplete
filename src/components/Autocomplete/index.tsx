@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDebouncedValue } from '../../hooks';
 import './Autocomplete.css';
+
+interface AutocompleteProps {
+  id?: string;
+  label?: string;
+  initialValue?: string;
+}
 
 const Autocomplete = ({ ...props }) => {
   const {
     id = "Autocomplete",
     label,
     initialValue = ""
-  } = props;
+  }: AutocompleteProps = props;
 
-  const [query, setQuery] = useState(initialValue);
+  const [searchValue, setSearchValue] = useState(initialValue);
+  const debouncedSearchValue = useDebouncedValue(searchValue);
   const [options, setOptions] = useState([]);
+
+  const getSearchResults = useCallback((query: string) => {
+    console.log(query);
+  }, [debouncedSearchValue]);
+
+  useEffect(() => {
+    getSearchResults(debouncedSearchValue)
+  }, [debouncedSearchValue, getSearchResults])
 
   return (
     <div id={id}>
@@ -26,11 +42,11 @@ const Autocomplete = ({ ...props }) => {
         aria-expanded="false"
         aria-autocomplete="list"
         aria-controls={`${id}__listbox`}
-        value={query}
-        onChange={({ target }) => setQuery(target.value)}
+        value={searchValue}
+        onChange={({ target }) => setSearchValue(target.value)}
       />
 
-      {query}
+      {searchValue}
 
       <ul
         id={`${id}__listbox`}
