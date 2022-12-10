@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useDebouncedValue } from '../../hooks';
 import './Autocomplete.css';
-
+import { SuggestionType } from './Autocomplete.types';
 interface AutocompleteProps {
   id?: string;
   label?: string;
-  initialValue?: string;
+  initialValue?: SuggestionType;
+  onSelect?: Function
 }
-
-type Suggestion = {}
 
 const KEYCODES = {
   ENTER: "Enter",
@@ -19,25 +18,42 @@ const KEYCODES = {
 const Autocomplete = ({ ...props }) => {
   const {
     id = "Autocomplete",
+    initialValue = { label: "", value: null },
     label,
-    initialValue = ""
+    onSelect,
   }: AutocompleteProps = props;
 
-  const inputRef = useRef(null);
+  const inputRef = useRef<any>(null);
 
   const [isFocused, setIsFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
-  const [searchValue, setSearchValue] = useState(initialValue);
+  const [searchValue, setSearchValue] = useState<string>(initialValue.label);
   const debouncedSearchValue = useDebouncedValue(searchValue);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionType[]>([]);
   const [highlightedOption, setHighlightedOption] = useState<number | null>(null);
 
-  const handleKeyboardNavigation = (keyCode: string) => {
+  const handleSuggestionSelect = (suggestion: SuggestionType): void => {
+    inputRef?.current?.blur();
+
+    setSuggestions([]);
+    setSearchValue(suggestion.label);
+    setIsFocused(false);
+    setHighlightedOption(null);
+
+    onSelect?.(suggestion);
+  }
+
+  const handleKeyboardNavigation = (keyCode: string): void => {
     const lastSuggestionIndex = suggestions.length - 1;
     const isLastItemSelected = highlightedOption === lastSuggestionIndex;
 
     switch(keyCode) {
+      case KEYCODES.ENTER:
+        if (highlightedOption) {
+          handleSuggestionSelect(suggestions[highlightedOption]);
+        }
+        break;
       case KEYCODES.ARROW_UP:
         setHighlightedOption(!highlightedOption ? lastSuggestionIndex : highlightedOption - 1);
         break;
@@ -49,16 +65,20 @@ const Autocomplete = ({ ...props }) => {
     }
   }
 
-  const getSearchResults = useCallback((query: string) => {
+  const getSearchResults = useCallback((query: string): void => {
     setIsSearching(true);
     
     setTimeout(() => {
-      setSuggestions([{}, {}, {}, {}, {}, {}]);
+      setSuggestions([
+        { label: 'Option #1', value: "1" }, 
+        { label: 'Option #2', value: "2" }, 
+        { label: 'Option #3', value: "3" }, 
+      ]);
       setIsSearching(false);
-    }, 2000)
+    }, 1000)
   }, [debouncedSearchValue]);
 
-  useEffect(() => {
+  useEffect((): void => {
     if (isFocused && searchValue.length > 0) {
       getSearchResults(debouncedSearchValue)
     }
@@ -94,34 +114,34 @@ const Autocomplete = ({ ...props }) => {
         }}
       />
 
-      {isFocused && suggestions.length > 0 && (
+      {isSearching && (
+        <div>Searching</div>
+      )}
+
+      {isFocused && !isSearching && suggestions.length > 0 && (
         <ul
           id={`${id}__listbox`}
           role="listbox"
           {...(label) ? { "aria-label": label } : {}}
         >
-          {isSearching
-            ? <li>
-                Searching...
-              </li>
-            : suggestions.map((suggestion, index) => (
-              <li
-                className={[
-                  "suggestions__item",
-                  highlightedOption === index ? "suggestions__item--highlighted" : ""
-                ].join(" ")}
-                role="option"
-                aria-posinset={index + 1}
-                aria-setsize={suggestions.length}
-                aria-selected="true"
-                tabIndex={-1}
-                key={`${JSON.stringify(suggestion)}__${index}`}
-                onMouseEnter={() => setHighlightedOption(index)}
-              >
-                Option #{index}
-              </li>
-            ))
-          }
+          {suggestions.map((suggestion, index) => (
+            <li
+              className={[
+                "suggestions__item",
+                highlightedOption === index ? "suggestions__item--highlighted" : ""
+              ].join(" ")}
+              role="option"
+              aria-posinset={index + 1}
+              aria-setsize={suggestions.length}
+              aria-selected="true"
+              tabIndex={-1}
+              key={`${JSON.stringify(suggestion)}__${index}`}
+              onMouseEnter={() => setHighlightedOption(index)}
+              onClick={() => handleSuggestionSelect(suggestion)}
+            >
+              Option #{index}
+            </li>)
+          )}
         </ul>
       )}
     </div>
