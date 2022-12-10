@@ -4,10 +4,12 @@ import './Autocomplete.css';
 const Autocomplete = ({ ...props }) => {
   const {
     id = "Autocomplete",
-    label
+    label,
+    initialValue = ""
   } = props;
 
-  const [options, setOptions] = useState([{}, {}]);
+  const [query, setQuery] = useState(initialValue);
+  const [options, setOptions] = useState([]);
 
   return (
     <div id={id}>
@@ -24,7 +26,11 @@ const Autocomplete = ({ ...props }) => {
         aria-expanded="false"
         aria-autocomplete="list"
         aria-controls={`${id}__listbox`}
+        value={query}
+        onChange={({ target }) => setQuery(target.value)}
       />
+
+      {query}
 
       <ul
         id={`${id}__listbox`}
