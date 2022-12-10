@@ -1,0 +1,7 @@
+.suggestions__item {
+  outline: none;
+}
+
+.suggestions__item--highlighted {
+  font-weight: 700;
+}

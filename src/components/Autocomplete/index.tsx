@@ -8,6 +8,12 @@ interface AutocompleteProps {
   initialValue?: string;
 }
 
+const KEYCODES = {
+  ENTER: "Enter",
+  ARROW_UP: "ArrowUp",
+  ARROW_DOWN: "ArrowDown"
+}
+
 const Autocomplete = ({ ...props }) => {
   const {
     id = "Autocomplete",
@@ -22,7 +28,25 @@ const Autocomplete = ({ ...props }) => {
 
   const [searchValue, setSearchValue] = useState(initialValue);
   const debouncedSearchValue = useDebouncedValue(searchValue);
-  const [options, setOptions] = useState([]);
+  const [suggestions, setSuggestions] = useState([{}, {}, {}, {}, {}, {}]);
+  const [highlightedOption, setHighlightedOption] = useState<number | null>(null);
+
+  const handleKeyboardNavigation = (keyCode: string) => {
+    const lastSuggestionIndex = suggestions.length - 1;
+    const isLastItemSelected = highlightedOption === lastSuggestionIndex;
+
+    console.log(keyCode)
+    switch(keyCode) {
+      case KEYCODES.ARROW_UP:
+        setHighlightedOption(!highlightedOption ? lastSuggestionIndex : highlightedOption - 1);
+        break;
+      case KEYCODES.ARROW_DOWN:
+        setHighlightedOption(isLastItemSelected || highlightedOption === null ? 0 : highlightedOption + 1);
+        break;
+      default:
+        break;
+    }
+  }
 
   const getSearchResults = useCallback((query: string) => {
     setIsSearching(true);
@@ -37,7 +61,10 @@ const Autocomplete = ({ ...props }) => {
   }, [isFocused, debouncedSearchValue, getSearchResults])
 
   return (
-    <div id={id}>
+    <div
+      id={id}
+      onKeyDown={({ code }) => handleKeyboardNavigation(code)}
+    >
       {label && (
         <label htmlFor={`${id}__input`}>
           {label}
@@ -54,13 +81,11 @@ const Autocomplete = ({ ...props }) => {
         aria-controls={`${id}__listbox`}
         value={searchValue}
         onFocus={() => setIsFocused(true)}
+        onChange={({ target }) => setSearchValue(target.value)}
         onBlur={() => {
           setIsFocused(false)
         }}
-        onChange={({ target }) => setSearchValue(target.value)}
       />
-
-      {isFocused.toString()}
 
       <ul
         id={`${id}__listbox`}
@@ -71,15 +96,19 @@ const Autocomplete = ({ ...props }) => {
           ? <li>
               Searching...
             </li>
-          : options.map((option, index) => (
+          : suggestions.map((suggestion, index) => (
             <li
-              className="suggestions__item"
+              className={[
+                "suggestions__item",
+                highlightedOption === index ? "suggestions__item--highlighted" : ""
+              ].join(" ")}
               role="option"
               aria-posinset={index + 1}
-              aria-setsize={options.length}
+              aria-setsize={suggestions.length}
               aria-selected="true"
               tabIndex={-1}
-              key={`${JSON.stringify(option)}__${index}`}
+              key={`${JSON.stringify(suggestion)}__${index}`}
+              onMouseEnter={() => setHighlightedOption(index)}
             >
               Option #{index}
             </li>
