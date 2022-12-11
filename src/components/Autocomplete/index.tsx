@@ -156,7 +156,7 @@ const Autocomplete = ({ ...props }) => {
         className="autocomplete__input"
         autoComplete="off"
         role="combobox"
-        aria-expanded="false"
+        aria-expanded={isFocused && !isSearching && suggestions !== null && suggestions.length > 0}
         aria-autocomplete="list"
         aria-controls={`${id}__listbox`}
         value={searchValue}
@@ -174,7 +174,7 @@ const Autocomplete = ({ ...props }) => {
         }}
       />
 
-      {suggestions === null && (
+      {suggestions === null && !isSearching && (
         <div className="autocomplete__empty">No countries found for this search. Please, try again.</div>
       )}
 
@@ -183,7 +183,11 @@ const Autocomplete = ({ ...props }) => {
       )}
 
       {isSearching && (
-        <div className="autocomplete__loading">Searching</div>
+        <div className="autocomplete__loading">
+          <span className="spinner"></span>
+
+          <span>Looking for results, please wait.</span>
+        </div>
       )}
 
       {isFocused && !isSearching && suggestions !== null && suggestions.length > 0 && (
@@ -202,11 +206,11 @@ const Autocomplete = ({ ...props }) => {
                   "suggestion",
                   highlightedOption === index ? "suggestion--highlighted" : ""
                 ].join(" ")}
+                tabIndex={-1}
                 role="option"
                 aria-posinset={index + 1}
                 aria-setsize={suggestions?.length}
-                aria-selected="true"
-                tabIndex={-1}
+                aria-selected={highlightedOption === index}
                 key={`${JSON.stringify(suggestion)}__${index}`}
                 onMouseEnter={() => setHighlightedOption(index)}
                 onClick={() => handleSuggestionSelect(suggestion)}
