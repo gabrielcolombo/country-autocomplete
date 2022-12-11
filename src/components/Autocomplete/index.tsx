@@ -105,6 +105,7 @@ const Autocomplete = ({ ...props }) => {
   const getSearchResults = useCallback(async (query: string): Promise<void> => {
     try {
       setIsSearching(true);
+      setHighlightedOption(null);
       
       if (ongoingRequest.current) {
         ongoingRequest.current.abort();
