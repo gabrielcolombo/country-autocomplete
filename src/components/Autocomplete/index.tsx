@@ -46,6 +46,7 @@ const Autocomplete = ({ ...props }) => {
     setSearchValue(suggestion.label);
     setIsFocused(false);
     setHighlightedOption(null);
+    suggestionsRef.current = [];
 
     onSelect?.(suggestion);
   }
@@ -54,6 +55,7 @@ const Autocomplete = ({ ...props }) => {
     setSearchValue("");
     setSuggestions([]);
     setHighlightedOption(null);
+    suggestionsRef.current = [];
 
     if (onClear) {
       onClear()
@@ -114,6 +116,8 @@ const Autocomplete = ({ ...props }) => {
 
       const response = await request.response;
       const countries = response.map((country: Country) => ({ label: country.name.common, value: country }))
+      
+      suggestionsRef.current = [];
 
       setSuggestions(countries);
       setIsSearching(false);
@@ -163,6 +167,9 @@ const Autocomplete = ({ ...props }) => {
           if (!relatedTarget || relatedTarget.tagName !== "LI") {
             setIsFocused(false);
             setSuggestions([]);
+            setHighlightedOption(null);
+
+            suggestionsRef.current = [];
           }
         }}
       />
