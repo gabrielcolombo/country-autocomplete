@@ -29,6 +29,7 @@ const Autocomplete = ({ ...props }) => {
 
   let ongoingRequest = useRef<any>(null);
   const inputRef = useRef<any>(null);
+  const suggestionsRef = useRef<any>([]);
 
   const [isFocused, setIsFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -59,6 +60,22 @@ const Autocomplete = ({ ...props }) => {
     }
   }
 
+  const handleArrowUpNavigation = (lastSuggestionIndex: number | null, isLastItemSelected: boolean): void => {
+    const arrowUpIndex = !highlightedOption ? lastSuggestionIndex : highlightedOption - 1;
+    setHighlightedOption(arrowUpIndex);
+
+    if (arrowUpIndex !== null) {
+      suggestionsRef.current[arrowUpIndex].scrollIntoViewIfNeeded();
+    }
+  }
+
+  const handleArrowDownNavigation = (isLastItemSelected: boolean): void => {
+    const arrowDownIndex = isLastItemSelected || highlightedOption === null ? 0 : highlightedOption + 1;
+
+    setHighlightedOption(arrowDownIndex);
+    suggestionsRef.current[arrowDownIndex].scrollIntoViewIfNeeded();
+  }
+
   const handleKeyboardNavigation = (keyCode: string): void => {
     const lastSuggestionIndex = suggestions ? suggestions.length - 1 : null;
     const isLastItemSelected = highlightedOption === lastSuggestionIndex;
@@ -70,13 +87,13 @@ const Autocomplete = ({ ...props }) => {
         }
         break;
       case KEYCODES.ESCAPE:
-        handleSelectionClear()
+        handleSelectionClear();
         break;
       case KEYCODES.ARROW_UP:
-        setHighlightedOption(!highlightedOption ? lastSuggestionIndex : highlightedOption - 1);
+        handleArrowUpNavigation(lastSuggestionIndex, isLastItemSelected);
         break;
       case KEYCODES.ARROW_DOWN:
-        setHighlightedOption(isLastItemSelected || highlightedOption === null ? 0 : highlightedOption + 1);
+        handleArrowDownNavigation(isLastItemSelected);
         break;
       default:
         break;
@@ -186,6 +203,7 @@ const Autocomplete = ({ ...props }) => {
                 key={`${JSON.stringify(suggestion)}__${index}`}
                 onMouseEnter={() => setHighlightedOption(index)}
                 onClick={() => handleSuggestionSelect(suggestion)}
+                ref={(element) => suggestionsRef.current.push(element)}
               >
                 <div className="content">
                   <span className="content__flag">{suggestion.value.flag}</span>
