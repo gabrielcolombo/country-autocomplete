@@ -3,15 +3,7 @@ import { useDebouncedValue } from '../../hooks';
 import { CountryRepository } from '../../repositories';
 import { Country } from '../../repositories/CountryRepository';
 import './Autocomplete.css';
-import { SuggestionType } from './Autocomplete.types';
-interface AutocompleteProps {
-  id?: string;
-  label?: string;
-  placeholder?: string;
-  initialValue?: SuggestionType;
-  onSelect?: Function;
-  onClear?: Function
-}
+import { AutocompleteProps, SuggestionType } from './Autocomplete.types';
 
 const KEYCODES = {
   ENTER: "Enter",
@@ -19,6 +11,11 @@ const KEYCODES = {
   ARROW_DOWN: "ArrowDown",
   ESCAPE: "Escape"
 }
+
+const highlight = (text: string, match: string) => text
+  .replace(new RegExp(match, 'gi'), '_')
+  .split('')
+  .map((char: string) => char === "_" ? <mark key={char}>{match}</mark> : char)
 
 const Autocomplete = ({ ...props }) => {
   const {
@@ -38,7 +35,7 @@ const Autocomplete = ({ ...props }) => {
 
   const [searchValue, setSearchValue] = useState<string>(initialValue.label);
   const debouncedSearchValue = useDebouncedValue(searchValue);
-  const [suggestions, setSuggestions] = useState<SuggestionType[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionType[] | null>([]);
   const [highlightedOption, setHighlightedOption] = useState<number | null>(null);
 
   const handleSuggestionSelect = (suggestion: SuggestionType): void => {
@@ -63,12 +60,12 @@ const Autocomplete = ({ ...props }) => {
   }
 
   const handleKeyboardNavigation = (keyCode: string): void => {
-    const lastSuggestionIndex = suggestions.length - 1;
+    const lastSuggestionIndex = suggestions ? suggestions.length - 1 : null;
     const isLastItemSelected = highlightedOption === lastSuggestionIndex;
     
     switch(keyCode) {
       case KEYCODES.ENTER:
-        if (highlightedOption) {
+        if (suggestions && highlightedOption !== null) {
           handleSuggestionSelect(suggestions[highlightedOption]);
         }
         break;
@@ -88,11 +85,11 @@ const Autocomplete = ({ ...props }) => {
 
   const getSearchResults = useCallback(async (query: string): Promise<void> => {
     try {
+      setIsSearching(true);
+      
       if (ongoingRequest.current) {
         ongoingRequest.current.abort();
       }
-
-      setIsSearching(true);
     
       const request = CountryRepository.fetchCountryByName(query);
 
@@ -102,20 +99,20 @@ const Autocomplete = ({ ...props }) => {
       const countries = response.map((country: Country) => ({ label: country.name.common, value: country }))
 
       setSuggestions(countries);
-    } catch(err) {
-      setSuggestions([]);
-    } finally {
       setIsSearching(false);
+    } catch(err) {
+      setIsSearching(false);
+      setSuggestions(null);
     }
   }, []);
 
   useEffect((): void => {
-    if (searchValue.length === 0) {
+    if (debouncedSearchValue.length === 0) {
       setSuggestions([])
-    } else if (isFocused && searchValue.length > 1) {
+    } else if (isFocused && debouncedSearchValue.length > 1) {
       getSearchResults(debouncedSearchValue)
     }
-  }, [isFocused, debouncedSearchValue, searchValue.length, getSearchResults])
+  }, [isFocused, debouncedSearchValue, getSearchResults])
 
   return (
     <div
@@ -153,45 +150,53 @@ const Autocomplete = ({ ...props }) => {
         }}
       />
 
-      {isSearching && (
-        <div>Searching</div>
+      {suggestions === null && (
+        <div className="autocomplete__empty">No countries found for this search. Please, try again.</div>
       )}
 
-      {isFocused && !isSearching && suggestions.length > 0 && (
+      {isFocused && !isSearching && (suggestions && suggestions.length === 0) && searchValue.length === 0 && (
+        <div className="autocomplete__validation">Please inform at least two letters to perform a search.</div>
+      )}
+
+      {isSearching && (
+        <div className="autocomplete__loading">Searching</div>
+      )}
+
+      {isFocused && !isSearching && suggestions !== null && suggestions.length > 0 && (
         <ul
           id={`${id}__listbox`}
           role="listbox"
           {...(label) ? { "aria-label": label } : {}}
           className="suggestions"
         >
-          {suggestions.map((suggestion, index) => {
+          {suggestions?.map((suggestion, index) => {
             const match = suggestion.value.name.common.match(new RegExp(searchValue, "gi"))
 
             return (
               <li
                 className={[
-                  "suggestions__item",
-                  highlightedOption === index ? "suggestions__item--highlighted" : ""
+                  "suggestion",
+                  highlightedOption === index ? "suggestion--highlighted" : ""
                 ].join(" ")}
                 role="option"
                 aria-posinset={index + 1}
-                aria-setsize={suggestions.length}
+                aria-setsize={suggestions?.length}
                 aria-selected="true"
                 tabIndex={-1}
                 key={`${JSON.stringify(suggestion)}__${index}`}
                 onMouseEnter={() => setHighlightedOption(index)}
                 onClick={() => handleSuggestionSelect(suggestion)}
               >
-                <b>
-                  {suggestion.value.flag}
+                <div className="content">
+                  <span className="content__flag">{suggestion.value.flag}</span>
+                  <b className="content__text">
+                    {highlight(suggestion.value.name.common, match)}
+                  </b>
+                </div>
 
-                  {suggestion.value.name.common
-                    .replace(match, '_')
-                    .split('')
-                    .map((char: string) => char === "_" ? <mark>{match}</mark> : char)
-                  }
-                </b>
-                <small>{suggestion.value.altSpellings.join(", ")}</small>
+                <small className="suggestion__description">
+                  {suggestion.value.altSpellings.join(', ')}
+                </small>
               </li>
             )
           })}

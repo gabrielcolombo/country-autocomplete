@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Autocomplete } from './components';
 import './App.css';
 
@@ -11,41 +11,52 @@ function App() {
     <div className="App">
       <header>
         <div className="container">
-          The Country Encyclopedia
+          <h1>The Country Encyclopedia</h1>
         </div>
       </header>
+
+      <div className="container">
+        <hr />
+      </div>
 
       <main>
         <div className="container">
           {!country
             ? (
                 <>
-                  <h1>Pick a country below to know more about it</h1>
+                  <h2>Search for a country below to find out more about it</h2>
+
                   <Autocomplete
+                    id="countries"
+                    placeholder="Name of the country"
                     onSelect={setCountry}
                     onClear={() => setCountry(null)}
                   />
                 </>
               )
             : (
-                <section>
-                  <h2>
-                    {country.value.name.common} {country.value.flag}
+                <div className="card">
+                  <h2 className="card__title">
+                    {country.value.flag} {country.value.name.common}
                   </h2>
 
-                  <p>
-                    Also known as {country.value.altSpellings.join(' / ')}, its a country
-                    located in {country.value.subregion}.
-                  </p>
+                  <div className="card__content">
+                    <p>
+                      Also known as <b>{country.value.altSpellings.join(' / ')}</b>, its a country
+                      located in <b>{country.value.subregion}</b>.
+                    </p>
 
-                  <p>
-                    It has a population of {country.value.population.toLocaleString()} peopleand
-                    {Object.values(country.value.languages).length} official language(s)
-                    ({Object.values(country.value.languages).join(' / ')}).
-                  </p>
+                    <p>
+                      It has a population of <b>{country.value.population.toLocaleString()}</b> people and
+                      &nbsp;<b>{Object.values(country.value.languages).length}</b> official language(s)
+                      (<b>{Object.values(country.value.languages).join(' / ')}</b>).
+                    </p>
+                  </div>
                   
-                  <button onClick={() => setCountry(null)}>Pick another country</button>
-                </section>
+                  <button onClick={() => setCountry(null)}>
+                    Pick another country
+                  </button>
+                </div>
               )
           }
         </div>

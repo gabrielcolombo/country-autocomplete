@@ -4,6 +4,12 @@
   width: 100%;
 }
 
+.autocomplete__validation,
+.autocomplete__loading,
+.autocomplete__empty {
+  padding: 15px 0;
+}
+
 .autocomplete__label,
 .autocomplete__input,
 .suggestions {
@@ -16,26 +22,26 @@
 }
 
 .suggestions {
-  top: 100%;
   max-height: 50vh;
   overflow: auto;
   position: absolute;
+  top: 100%;
 }
 
-.suggestions__item {
+.suggestion {
   outline: none;
   padding: 10px;
 }
 
-.suggestions__item b {
-  display: block;
+.suggestion:hover {
+  cursor: pointer;
 }
 
-.suggestions__item small {
+.content__flag {
+  margin: 0 5px 0 0;
+}
+
+.suggestion small {
   color: #999;
   padding: 5px 0;
-}
-
-.suggestions__item--highlighted {
-  background: #ddd;
 }
