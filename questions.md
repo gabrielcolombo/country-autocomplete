@@ -26,7 +26,6 @@ Your app may break if you're providing non-primitive values (e.g arrays and obje
 - A fragment is a react element that allows you to return multiple elements without the need for a parent element. For example, if you have a Table component and want to define a Columns component, with a few table cells, you'd have to wrap it in another element in order to return it, such as a div, which would break the semantics / structure of the code.
 In order to solve this, we can wrap the table cells in a fragment that acts as a parent element but doesn't get rendered.
 
-
 **Give 3 examples of the HOC pattern.**
 - Components to handle application flow such as routing (e.g withRouter) and authentication (e.g requiresAuth)
 
@@ -61,7 +60,7 @@ It can receive two arguments:
 - Migrate lifecycle methods to its appropriate hooks (e.g useEffect)
 - Remove the constructor function
 - Remove any "this" references
-- Remove the render function and set its content as the return of this new function.
+- Remove the render function and set its content as the return value of this new function.
 
 **List a few ways styles can be used with components.**
 - Inline styles
