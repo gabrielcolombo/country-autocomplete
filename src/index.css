@@ -30,7 +30,7 @@ main h2 {
 }
 
 main .autocomplete {
-  margin: 30px 0 0;
+  margin: 30px 0;
 }
 
 #countries .autocomplete__input {
